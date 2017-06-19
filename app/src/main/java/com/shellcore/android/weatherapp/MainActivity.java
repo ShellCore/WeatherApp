@@ -1,42 +1,51 @@
 package com.shellcore.android.weatherapp;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
 
-import com.shellcore.android.weatherapp.API.WeatherInterface;
+import com.shellcore.android.weatherapp.model.WeatherData;
 import com.shellcore.android.weatherapp.model.WeatherResponse;
+import com.shellcore.android.weatherapp.task.WeatherTask;
 
-import java.io.IOException;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-import retrofit2.Call;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+public class MainActivity extends AppCompatActivity implements WeatherTask.WeatherListener {
 
-public class MainActivity extends AppCompatActivity {
-
+    // Constants
     public static final String BASE_URL = "http://api.wunderground.com/api/";
-    public static final String API_KEY = ""; // TODO PASTE HERE YOUR API KEY
+    public static final String API_KEY = "71a068bb14405eda";
+
+    // Components
+    @BindView(R.id.pressure)
+    TextView pressure;
+    @BindView(R.id.countryName)
+    TextView countryName;
+    @BindView(R.id.temperature)
+    TextView temperature;
+    @BindView(R.id.humidity)
+    TextView humidity;
+    @BindView(R.id.weather)
+    TextView weather;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        //*********** TODO: MOVE THIS BLOCK OF CODE TO AN ASYNC_TASK ***********
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        WeatherTask task = new WeatherTask(this, this);
+        task.execute(BASE_URL, API_KEY);
+    }
 
-        WeatherInterface weatherInterface = retrofit.create(WeatherInterface.class);
-        Call<WeatherResponse> call = weatherInterface.getWeatherFromSanFrancisco(API_KEY);
-        WeatherResponse response = null;
-
-        try {
-            response = call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //**********************************************************************
+    @Override
+    public void handleResult(WeatherResponse response) {
+        WeatherData data = response.getWeatherData();
+        countryName.setText(data.getDisplayLocation().getCityName());
+        weather.setText(data.getWeather());
+        temperature.setText(data.getTemp());
+        pressure.setText(data.getPressure());
+        humidity.setText(data.getHumidity());
     }
 }

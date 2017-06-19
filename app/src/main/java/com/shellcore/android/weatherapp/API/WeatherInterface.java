@@ -19,7 +19,7 @@ public interface WeatherInterface {
             @Query("APPID") String appId
     );*/
 
-    @GET("{api_key}/conditios/q/CA/San_Fransisco.json")
+    @GET("{api_key}/conditions/q/Mexico/Mexico_City.json")
     Call<WeatherResponse> getWeatherFromSanFrancisco(
             @Path("api_key") String apiKey
     );
